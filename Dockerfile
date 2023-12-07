@@ -24,7 +24,7 @@ RUN apt-get update && apt-get dist-upgrade -y
 RUN apt-get install sudo net-tools vim nano zsh git -y
 
 # add tux user to sudoers
-RUN echo '%sudo ALL=(ALL:AzLL) NOPASSWD:ALL' > /etc/sudoers.d/sudo-group
+RUN echo '%sudo ALL=(ALL:ALL) NOPASSWD:ALL' > /etc/sudoers.d/sudo-group
 
 # append bash custom code to /etc/bash.bashrc
 RUN cat /tmp/bashrc-addition >> /etc/bash.bashrc && \
