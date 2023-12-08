@@ -1,46 +1,54 @@
-
-
 # Dockerized Dev Environment TEST
-This is an experiment to see how well a dockerized development environment might work. The benefits to this:
- * **Isolated** - any installed software, or modified resources, are largely limited to the container. 
- * **Consistency** - The Docker environment is consistent on any machine or OS underlying it
- * **Reproducibility** - Reproducing the environment only needs a text file 
- * **Ease of Setup** - Everything needed to setup the environment can be done once and used by everyone
- * **Dependency Management** - Applications running in Docker have software fully provisioned for what they need to function
- * **VCS Integration** - The entire environment can be versioned in git for change tracking and collaboration
- * **Workstation Stability** - Software installed in the Docker container does not affect the host operating system, or it's installed software
- * **Elevated Access** - Docker provides a viable alternative for obtaining elevated access on a host system for installing application support software.
 
-This project makes use of a volume mount "app" directory. This allows for running full capabilities of an IDE on the host system, and writing to a shared location inside the running docker container. The application can then be run from inside the docker container where all of the support software is installed. Two sample files are included in the app directory.
+This project explores the benefits of using a dockerized development environment. The advantages include:
 
-The app directory has 0777 permissions applied to it so it can be shared with the `tux` user inside the container. The Unix UID and GID of the `tux` user could be fiddled with to make them the same as the developer and allow for tighter permissions.
+* **Isolation**: Installed software and modified resources are contained within the Docker container.
+* **Consistency**: The Docker environment remains consistent across different machines and operating systems.
+* **Reproducibility**: Easily reproduce the environment using a text file.
+* **Ease of Setup**: Set up the environment once and share the configuration with everyone.
+* **Dependency Management**: Applications running in Docker have all necessary software provisioned for their functionality.
+* **VCS Integration**: The entire environment can be versioned in git for change tracking and collaboration.
+* **Workstation Stability**: Software installed in the Docker container does not impact the host operating system.
+* **Elevated Access**: Docker provides an alternative for obtaining elevated access on a host system.
 
-## etc/bashrc-addition
-The file etc/bashrc-addition is added to the /etc/bash.bashrc Docker container during build. If you have specific aliases, functions or other shell shortcuts you like to use, put them in that file.
+## Usage
 
-## requirements.txt
-The file requirements.txt contains the Python dependency packages to install into the Docker container. 
+This project uses a volume mount "app" directory, enabling the full capabilities of an IDE on the host system while writing to a shared location inside the running Docker container. The application can be run within the container, where all supporting software is installed. Run `make runm` to volume mount the app directory within the container. 
 
-The Dockerfile sets up a lightweight Python development environment based on the official Ubuntu 3.8-slim-buster image. The environment includes a non-root user named `tux` for development use, and sudo access for elevating to install software or other management needs.
+## Permissions
 
+If the app directory is created by the user running the docker build, it should be writable by the user in the container as well as user on the host system. If you run into odd permission issues for some reason, you may need to experiment with the permissions.
+
+## Customization
+
+### etc/bashrc-addition
+
+The file `etc/bashrc-addition` is added to the `/etc/bash.bashrc` Docker container during build. Customize this file with specific aliases, functions, or other shell shortcuts.
+
+### requirements.txt
+
+The `requirements.txt` file contains Python dependency packages to install into the Docker container. Other languages and dependency conventions could certainly be implemented instead.
 ## Dockerfile
 
-- Creates a non-root user (`tux`) with `/bin/bash` as the default shell.
-- Grants sudo access to the `tux` user.
+The Dockerfile sets up a lightweight Python development environment based on the official Ubuntu 3.8-slim-buster image. The environment includes a non-root user for development use and sudo access for elevating to install software or other management needs.
+
+- Creates a non-root user with `/bin/bash` as the default shell using the UID and GID of the user running the build.
+- Grants sudo access to the user.
 - Copies custom additions to `bash.bashrc` into the image.
 - Sets the working directory to `/app`.
 - Installs Python dependencies listed in `requirements.txt` using pip3.
 - Updates and upgrades the system packages.
 - Installs support packages such as sudo, net-tools, vim, nano, zsh, and git.
-- Adds the `tux` user to the sudoers group with passwordless sudo access.
+- Adds the user to the sudoers group with passwordless sudo access.
 - Appends custom bash code from `/tmp/bashrc-addition` to `/etc/bash.bashrc`.
-- Switches to the non-root user `tux` for the container shell.
+- Switches to the non-root user for the container shell.
 - Specifies the default command to run when the container starts as `/bin/bash`.
 
+## Makefile
 
 A Makefile manages the build and run process. This provides simple commands for building, running, and cleaning up the Docker containers and images.
 
-## Makefile Usage
+### Makefile Usage
 
 1. **Build Docker Image:**
 
@@ -48,7 +56,7 @@ A Makefile manages the build and run process. This provides simple commands for 
     make build
     ```
 
-    This command builds a Docker image named `aws-image`.
+    This command builds a Docker image named `dev-test-image` with the latest tag.
 
 2. **Run Docker Container:**
 
@@ -56,7 +64,7 @@ A Makefile manages the build and run process. This provides simple commands for 
     make run
     ```
 
-    This command runs a Docker container named `aws-tester` based on the `aws-image`.
+    This command runs a Docker container named `dev-test-container` based on the `dev-test-image:latest`.
 
 3. **Run Docker Container with Volume Mount:**
 
@@ -72,7 +80,7 @@ A Makefile manages the build and run process. This provides simple commands for 
     make stop
     ```
 
-    This command stops the running Docker container named `aws-tester`.
+    This command stops the running Docker container named `dev-test-container`.
 
 5. **Clean Up:**
 
@@ -80,21 +88,22 @@ A Makefile manages the build and run process. This provides simple commands for 
     make clean
     ```
 
-    This command removes the Docker container (`aws-tester`) and the Docker image (`aws-image`).
+    This command removes the Docker container (`dev-test-container`) and the Docker image (`dev-test-image`).
 
-## Variables
+### Variables
 
-- `IMAGE_NAME`: Name of the Docker image (default: aws-image).
-- `CONTAINER_NAME`: Name of the Docker container (default: aws-tester).
+- `IMAGE_NAME`: Name of the Docker image (default: dev-test-image).
+- `IMAGE_VERSION`: Version tag of the Docker image (default: latest).
+- `CONTAINER_NAME`: Name of the Docker container (default: dev-test-container).
 - `HOST_PATH`: Path on the host machine for volume mounting (default: ./app).
 
-## Notes
+### Notes
 
-- Make sure to adjust the `HOST_PATH` variable in the Makefile according to your project structure.
+- Adjust the `HOST_PATH` variable in the Makefile according to your project structure.
 
 - The provided Makefile assumes that you have Docker installed on your machine.
 
-## Makefile Commands
+### Makefile Commands
 
 - `build`: Build the Docker image.
 - `run`: Run the Docker container.
