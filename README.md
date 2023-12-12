@@ -90,6 +90,22 @@ A Makefile manages the build and run process. This provides simple commands for 
 
     This command removes the Docker container (`dev-test-container`) and the Docker image (`dev-test-image`).
 
+6. **Connect to running container:**
+
+    ```bash
+    make connect
+    ```
+
+    This command connects to the running Docker container (`dev-test-container`).
+
+7. **Upgrade via pip when building:**
+
+    ```bash
+    make build_upgrade
+    ```
+
+    This command instructs pip to upgrade the packages found in `requirements.txt` to their latest version when builduing the Docker container.
+
 ### Variables
 
 - `IMAGE_NAME`: Name of the Docker image (default: dev-test-image).
@@ -110,6 +126,8 @@ A Makefile manages the build and run process. This provides simple commands for 
 - `runm`: Run the Docker container with volume mounting.
 - `stop`: Stop the running Docker container.
 - `clean`: Remove the Docker container and image.
+- `connect`: Connect to the running Docker container.
+- `build_upgrade`: Instruct pip to install/upgrade packages in requirements.txt.
 
 ```bash
 # Example usage:
@@ -118,3 +136,5 @@ A Makefile manages the build and run process. This provides simple commands for 
 #   make runm
 #   make stop
 #   make clean
+#   make connect
+#   make build_upgrade
