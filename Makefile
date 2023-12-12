@@ -8,6 +8,7 @@ USER_GROUP_NAME := $(shell id -gn)
 USER_NAME 		:= $(shell id -un)
 USER_SHELL 		:= $(shell echo $$SHELL)
 USER_HOME 		:= $(shell echo $$HOME)
+PIP_UPGRADE		:= "false"
 
 # Make target to echo variable values
 show-variables:
@@ -29,6 +30,18 @@ build:
 		--build-arg USER_NAME=$(USER_NAME) \
 		--build-arg USER_SHELL=$(USER_SHELL) \
 		--build-arg USER_HOME=$(USER_HOME) \
+		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
+		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
+
+build_upgrade:    
+	docker build \
+		--build-arg USER_UID=$(USER_UID) \
+		--build-arg USER_GROUP_GID=$(USER_GROUP_GID) \
+		--build-arg USER_GROUP_NAME=$(USER_GROUP_NAME) \
+		--build-arg USER_NAME=$(USER_NAME) \
+		--build-arg USER_SHELL=$(USER_SHELL) \
+		--build-arg USER_HOME=$(USER_HOME) \
+		--build-arg PIP_UPGRADE="true" \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
 run:
@@ -44,6 +57,9 @@ runm:
 	--volume ./app:/app/ \
 	${IMAGE_NAME}:${IMAGE_VERSION}
 
+connect:
+	docker exec -it $(CONTAINER_NAME) /bin/bash
+
 stop:
 	docker stop $(CONTAINER_NAME)
 
@@ -57,6 +73,7 @@ help:
 	@echo "  make build       - Build the Docker image"
 	@echo "  make run         - Run the Docker container"
 	@echo "  make runm        - Run the Docker container with volume mounted app directory"
+	@echo "  make connect	  - Connect to the running container"
 	@echo "  make stop        - Stop the Docker container"
 	@echo "  make clean       - Stop and remove the Docker container, and remove the Docker image"
 	@echo "  make help        - Display this help message"
