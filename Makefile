@@ -33,6 +33,17 @@ build:
 		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
+rebuild:    
+	docker build --no-cache \
+		--build-arg USER_UID=$(USER_UID) \
+		--build-arg USER_GROUP_GID=$(USER_GROUP_GID) \
+		--build-arg USER_GROUP_NAME=$(USER_GROUP_NAME) \
+		--build-arg USER_NAME=$(USER_NAME) \
+		--build-arg USER_SHELL=$(USER_SHELL) \
+		--build-arg USER_HOME=$(USER_HOME) \
+		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
+		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
+
 build_upgrade:    
 	docker build \
 		--build-arg USER_UID=$(USER_UID) \
@@ -77,4 +88,5 @@ help:
 	@echo "  make stop        - Stop the Docker container"
 	@echo "  make clean       - Stop and remove the Docker container, and remove the Docker image"
 	@echo "  make help        - Display this help message"
+	@echo "  make rebuild     - Build the docker image with --no-cache option"
 # vim: set ts=4 sw=4 tw=0 noet :
