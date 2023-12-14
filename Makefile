@@ -68,6 +68,14 @@ runm:
 	--volume ./app:/app/ \
 	${IMAGE_NAME}:${IMAGE_VERSION}
 
+runmh:
+	docker run -it --rm \
+	--user ${USER_UID}:${USER_GROUP_GID} \
+	--name ${CONTAINER_NAME} \
+	--volume ./app:/app/ \
+	--volume /home/${USER_NAME}:/mnt/${USER_NAME}:ro \
+	${IMAGE_NAME}:${IMAGE_VERSION}
+
 connect:
 	docker exec -it $(CONTAINER_NAME) /bin/bash
 
@@ -84,6 +92,7 @@ help:
 	@echo "  make build       - Build the Docker image"
 	@echo "  make run         - Run the Docker container"
 	@echo "  make runm        - Run the Docker container with volume mounted app directory"
+	@echo "  make runmh       - Run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_NAME}"
 	@echo "  make connect	  - Connect to the running container"
 	@echo "  make stop        - Stop the Docker container"
 	@echo "  make clean       - Stop and remove the Docker container, and remove the Docker image"
