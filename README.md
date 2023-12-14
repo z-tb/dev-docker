@@ -74,7 +74,17 @@ A Makefile manages the build and run process. This provides simple commands for 
 
     This command runs a Docker container with volume mounting, allowing you to mount the `./app` directory from the host to `/app/` in the container. It opens a bash shell in the container.
 
-4. **Stop Docker Container:**
+4. **Run Docker Container with Volume Mount (/app and /mnt/$HOME)**
+
+    ```bash
+    make runmh
+    ```
+
+    Runs a Docker container with volume mounting of `./app` on `/app` from the host and `$HOME` of the host mounted Read-Only to `/mnt/$HOME` in the container. Also opens a bash shell.
+
+    You could add symlinks in the container to point to things like /mnt/$HOME/.ssh (for git over ssh)
+
+5. **Stop Docker Container:**
 
     ```bash
     make stop
@@ -82,7 +92,7 @@ A Makefile manages the build and run process. This provides simple commands for 
 
     This command stops the running Docker container named `dev-test-container`.
 
-5. **Clean Up:**
+6. **Clean Up:**
 
     ```bash
     make clean
@@ -90,7 +100,7 @@ A Makefile manages the build and run process. This provides simple commands for 
 
     This command removes the Docker container (`dev-test-container`) and the Docker image (`dev-test-image`).
 
-6. **Connect to running container:**
+7. **Connect to running container:**
 
     ```bash
     make connect
@@ -98,13 +108,22 @@ A Makefile manages the build and run process. This provides simple commands for 
 
     This command connects to the running Docker container (`dev-test-container`).
 
-7. **Upgrade via pip when building:**
+8. **Upgrade via pip when building:**
 
     ```bash
     make build_upgrade
     ```
 
     This command instructs pip to upgrade the packages found in `requirements.txt` to their latest version when builduing the Docker container.
+
+
+9. **Build using the --no-cache options:**
+
+    ```bash
+    make rebuild
+    ```
+
+    This command instructs docker to build the image without using the Docker build cache. Can be useful for troubleshooting to ensure a consistent build when other things are questionable.
 
 ### Variables
 
@@ -124,10 +143,12 @@ A Makefile manages the build and run process. This provides simple commands for 
 - `build`: Build the Docker image.
 - `run`: Run the Docker container.
 - `runm`: Run the Docker container with volume mounting.
+- `runmh`: Run the Docker container with volume mounting of ./app on /app, and $HOME on /mnt/$HOME.
 - `stop`: Stop the running Docker container.
 - `clean`: Remove the Docker container and image.
 - `connect`: Connect to the running Docker container.
 - `build_upgrade`: Instruct pip to install/upgrade packages in requirements.txt.
+- `rebuild`: Build the docker image using `--no-cache`
 
 ```bash
 # Example usage:
@@ -138,3 +159,4 @@ A Makefile manages the build and run process. This provides simple commands for 
 #   make clean
 #   make connect
 #   make build_upgrade
+#   make rebuild
