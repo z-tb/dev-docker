@@ -43,6 +43,7 @@ RUN apt-get install sudo \
     vim \
     nano \
     zsh \
+    zip \
     git -y
 
 # create a user account, non-root, of the user running the build
