@@ -41,6 +41,7 @@ RUN apt-get install sudo \
     gnupg \
     wget \
     vim \
+    make \
     nano \
     zsh \
     zip \
