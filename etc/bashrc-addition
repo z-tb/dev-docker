@@ -59,6 +59,8 @@ alias gpull='git pull origin `get_git_branch`'
 alias gpush='git push origin `get_git_branch`; git push origin --tags'
 alias gpusha='git push --all origin'
 alias glog='git log --pretty --oneline'
+# aws cli aliases 
+alias asl="aws s3 ls"
 
 
 # color prompt - run pcol
