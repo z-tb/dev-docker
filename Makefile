@@ -1,14 +1,17 @@
-IMAGE_NAME 	 	= dev-test-image
-IMAGE_VERSION   = latest
-CONTAINER_NAME 	= dev-test-container
-HOST_PATH 	    = ./app
-USER_UID 		:= $(shell id -u)
-USER_GROUP_GID 	:= $(shell id -g)
+# Makefile for running a Docker image used for development
+
+# Define variables for Docker image and container
+IMAGE_NAME     = dev-test-image
+IMAGE_VERSION  = latest
+CONTAINER_NAME = dev-test-container
+HOST_PATH      = ./app
+USER_UID       := $(shell id -u)
+USER_GROUP_GID := $(shell id -g)
 USER_GROUP_NAME := $(shell id -gn)
-USER_NAME 		:= $(shell id -un)
-USER_SHELL 		:= $(shell echo $$SHELL)
-USER_HOME 		:= $(shell echo $$HOME)
-PIP_UPGRADE		:= "false"
+USER_NAME      := $(shell id -un)
+USER_SHELL     := $(shell echo $$SHELL)
+USER_HOME      := $(shell echo $$HOME)
+PIP_UPGRADE    := "false"
 
 # Make target to echo variable values
 show-variables:
@@ -22,7 +25,8 @@ show-variables:
 	@echo "CONTAINER_NAME: $(CONTAINER_NAME)"
 	@echo "HOST_PATH: $(HOST_PATH)"
 
-build:    
+# Make target to build the Docker image
+build:
 	docker build \
 		--build-arg USER_UID=$(USER_UID) \
 		--build-arg USER_GROUP_GID=$(USER_GROUP_GID) \
@@ -33,7 +37,8 @@ build:
 		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
-rebuild:    
+# Make target to rebuild the Docker image with --no-cache option
+rebuild:
 	docker build --no-cache \
 		--build-arg USER_UID=$(USER_UID) \
 		--build-arg USER_GROUP_GID=$(USER_GROUP_GID) \
@@ -44,7 +49,8 @@ rebuild:
 		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
-build_upgrade:    
+# Make target to build the Docker image with PIP upgrade for things in the requirements.txt file
+build_upgrade:
 	docker build \
 		--build-arg USER_UID=$(USER_UID) \
 		--build-arg USER_GROUP_GID=$(USER_GROUP_GID) \
@@ -55,12 +61,14 @@ build_upgrade:
 		--build-arg PIP_UPGRADE="true" \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
+# Make target to just run the Docker container with no mounts
 run:
 	docker run -it --rm \
 	--user ${USER_UID}:${USER_GROUP_GID}  \
 	--name $(CONTAINER_NAME) \
 	$(IMAGE_NAME):${IMAGE_VERSION}
 
+# Make target to run the Docker container with volume mounted app directory
 runm:
 	docker run -it --rm \
 	--user ${USER_UID}:${USER_GROUP_GID} \
@@ -68,6 +76,7 @@ runm:
 	--volume ./app:/app/ \
 	${IMAGE_NAME}:${IMAGE_VERSION}
 
+# Make target to run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_NAME}
 runmh:
 	docker run -it --rm \
 	--user ${USER_UID}:${USER_GROUP_GID} \
@@ -76,12 +85,15 @@ runmh:
 	--volume /home/${USER_NAME}:/mnt/${USER_NAME}:ro \
 	${IMAGE_NAME}:${IMAGE_VERSION}
 
+# Make target to connect to the running container
 connect:
 	docker exec -it $(CONTAINER_NAME) /bin/bash
 
+# Make target to stop the Docker container
 stop:
 	docker stop $(CONTAINER_NAME)
 
+# Make target to stop and remove the Docker container, and remove the Docker image
 clean: stop
 	docker rm $(CONTAINER_NAME)
 	docker rmi $(IMAGE_NAME)
