@@ -1,6 +1,6 @@
-# Dockerized Dev Environment TEST
+# Dockerized Dev Environment
 
-This project explores the benefits of using a dockerized development environment. The advantages include:
+This project configures a dockerized development environment tailored for AWS DevOps usage. There are several advatanges to developing in a container over familar host-based development environments which include:
 
 * **Isolation**: Installed software and modified resources are contained within the Docker container.
 * **Consistency**: The Docker environment remains consistent across different machines and operating systems.
@@ -12,8 +12,9 @@ This project explores the benefits of using a dockerized development environment
 * **Elevated Access**: Docker provides an alternative for obtaining elevated access on a host system.
 
 ## Usage
+Obviously, `docker` and it's related support software needs to be installed on the host system. Additionally, the `make` utility is used to assist in managing the build environment, but isn't necessary. You could enter the build commands manually of course.
 
-This project uses a volume mount "app" directory, enabling the full capabilities of an IDE on the host system while writing to a shared location inside the running Docker container. The application can be run within the container, where all supporting software is installed. Run `make runm` to volume mount the app directory within the container. 
+A volume mount "app" directory is enabled at docker runtime. This enables the full capabilities of an IDE on the host system while writing to a shared location inside the running Docker container. The application being developed is run within the container, where all supporting software is installed. Run `make runm` to volume mount the app directory within the container. Several other `make` targets exist for different functionaly such as running the container with permissions of the user launching docker instead of just `root`.
 
 ## Permissions
 
