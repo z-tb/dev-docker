@@ -1,10 +1,12 @@
 # Dockerized Dev Environment
 
-This project configures a dockerized development environment tailored for AWS DevOps usage. There are several advatanges to developing in a container over familar host-based development environments which include:
+This project configures a dockerized development environment for AWS usage. The `devops` branch contains a more specific AWS build with additional functionality. There are several advatanges to developing in these containers over traditional host-based development environments. These advantages include:
 
 * **Isolation**: Installed software and modified resources are contained within the Docker container.
+    * Egress filtering can be applied to the container using the host firewall
+    * Drivers exist for docker which can further isolate the container (`IPVlan`, `MacVLAN`, etc)
 * **Consistency**: The Docker environment remains consistent across different machines and operating systems.
-* **Reproducibility**: Easily reproduce the environment using a text file.
+* **Reproducibility**: Easily reproduce the environment using the docker configuration and Makefile.
 * **Ease of Setup**: Set up the environment once and share the configuration with everyone.
 * **Dependency Management**: Applications running in Docker have all necessary software provisioned for their functionality.
 * **VCS Integration**: The entire environment can be versioned in git for change tracking and collaboration.
