@@ -17,6 +17,8 @@ The `devops` branch contains additional `make` targets, Python libraries and add
 
 This project uses a volume mount "app" directory, enabling the full capabilities of an IDE on the host system while writing to a shared location inside the running Docker container. The application can be run within the container, where all supporting software is installed. Run `make runm` to volume mount the app directory within the container. 
 
+Additionally, the `runmh` make target will R/O mount the home directory of the build user into `/mnt/` of the container. This can be essential for operations needed a `~/.gitconfig` or `~/.ssh` configuration. The read-only mount restricts any changes to the home directory from within the container. 
+
 ## Permissions
 
 If the app directory is created by the user running the docker build, it should be writable by the user in the container as well as user on the host system. If you run into odd permission issues for some reason, you may need to experiment with the permissions.
