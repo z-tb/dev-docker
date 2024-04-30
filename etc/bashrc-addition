@@ -82,7 +82,7 @@ function pcol() {
 
     # User-specific prompt components
     TIME_DATE="[${BOLD_PURPLE}\$(date '+%I:%M')${RESET} \$(date '+%D')\$(display_git_branch)${BOLD_CYAN}]"
-    USER_HOST="[${BOLD_CYAN}${UC}\u${BOLD_GREEN}@docker-${BOLD_MAGENTA}\h${BOLD_YELLOW} \w${BOLD_CYAN}]"
+    USER_HOST="[${BOLD_CYAN}${UC}\u${BOLD_GREEN}@${BOLD_MAGENTA}docker-\h${BOLD_YELLOW} \w${BOLD_CYAN}]"
     PCHAR="${LIGHT_GRAY}${PCHAR}${RESET}"
 
     # Combine components into multi-line PS1 without escapes
