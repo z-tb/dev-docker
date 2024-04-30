@@ -1,4 +1,4 @@
-# Dockerized Dev Environment TEST
+# Dockerized Dev Environment (devops branch)
 
 This project explores the benefits of using a dockerized development environment. The advantages include:
 
@@ -10,6 +10,8 @@ This project explores the benefits of using a dockerized development environment
 * **VCS Integration**: The entire environment can be versioned in git for change tracking and collaboration.
 * **Workstation Stability**: Software installed in the Docker container does not impact the host operating system.
 * **Elevated Access**: Docker provides an alternative for obtaining elevated access on a host system.
+
+The `devops` branch contains additional `make` targets, Python libraries and additional utilities to support DevOps workflows.
 
 ## Usage
 
