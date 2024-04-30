@@ -41,8 +41,13 @@ RUN apt-get install sudo \
     gnupg \
     wget \
     vim \
+    jq \
     make \
     nano \
+    procps \
+    pylint \
+    tree \
+    iputils-ping \
     zsh \
     zip \
     git -y
@@ -58,17 +63,33 @@ RUN groupadd -g ${USER_GROUP_GID} ${USER_GROUP_NAME} \
 # with %sudo, you need to use 'newgrp' after login for some reason, so use the USERNAME here instead
 RUN echo "${USER_NAME} ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/sudo-users
 
-# install hashicorp repo and terraform
-RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-RUN echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-RUN apt update &&  apt install -y terraform
+# install opentofu - Download the installer script:
+RUN cd /tmp/ && curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh && \
+   chmod +x install-opentofu.sh && \
+   ./install-opentofu.sh --install-method deb
+#rm install-opentofu.sh
 
 # lsb-release is needed by Terraform, but causes problems with Python modules
+# needed with OpenTofu ?
 RUN apt purge lsb-release -y && apt autoremove -y
-
 
 # switch to non-root build user for shell
 USER ${USER_NAME}
+
+# enable custom prompt via alias in /etc/bash.bashrc
+# symlink ~/.ssh and .gitconfigfrom mounted $HOME
+RUN echo 'pcol' >> ~/.bashrc
+RUN test -d /mnt/${USERNAME} && rm -rfv ~/.ssh
+RUN test -d /mnt/${USERNAME} && ln -s /mnt/${USER_NAME}/.ssh ~/
+RUN test -d /mnt/${USERNAME} && ln -s /mnt/${USER_NAME}/.gitconfig ~/
+
+# if the /$HOME/bin directory exists, link it so .bashrc picks it up and puts in the path
+RUN if [ -d "/mnt/${USER_NAME}/bin" ]; then ln -s "/mnt/${USER_NAME}/bin" ~/; fi
+
+# add ~/.aws/credentials and ~/.aws/config
+RUN mkdir -p ~/.aws
+RUN printf "[default]\nregion = ${AWS_REGION}\noutput = json\n" > ${HOME}/.aws/config
+RUN printf "[default]\naws_access_key_id =\naws_secret_access_key =\n" > ${HOME}/.aws/credentials
 
 # Command to run when the container starts
 CMD ["/bin/bash"]
