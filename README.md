@@ -21,7 +21,9 @@ Additionally, the `runmh` make target will R/O mount the home directory of the b
 
 ## Permissions
 
-If the app directory is created by the user running the docker build, it should be writable by the user in the container as well as user on the host system. If you run into odd permission issues for some reason, you may need to experiment with the permissions.
+If the app directory is created by the user running the docker build, it will be writable by the user in the container, as well as user on the host system. If you run into odd permission issues for some reason, you may need to experiment with the permissions.
+
+Of note, if using volum mounts, the `docker` daemon will create the directories on the host system with root ownership. This isn't ideal, so the Makefile attempts to create these as the user running `make` at build/run time.
 
 ## Customization
 

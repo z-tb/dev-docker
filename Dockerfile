@@ -18,10 +18,10 @@ RUN cat /tmp/bashrc-addition >> /etc/bash.bashrc && \
     rm /tmp/bashrc-addition 
 
 # Set the working directory to the shared app directory
-WORKDIR /app
+WORKDIR ${CONT_APP_DIR}
 
 # python reqs - Python 3 and pip
-COPY requirements.txt /app/requirements.txt
+COPY requirements.txt ${CONT_APP_DIR}/requirements.txt
 
 # install or upgrade via pip
 RUN if [ "${PIP_UPGRADE}" = "true" ]; then \

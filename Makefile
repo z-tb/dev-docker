@@ -4,7 +4,8 @@
 IMAGE_NAME     = dev-test-image
 IMAGE_VERSION  = latest
 CONTAINER_NAME = dev-test-container
-HOST_PATH      = ./app
+HOST_PATH      = ./apps
+CONT_APP_MNT   = /apps
 USER_UID       := $(shell id -u)
 USER_GROUP_GID := $(shell id -g)
 USER_GROUP_NAME := $(shell id -gn)
@@ -19,6 +20,14 @@ ifeq ($(AWS_REGION),)
     AWS_REGION := $(shell aws configure get region)
 endif
 
+# create teh HOST_PATH directory
+$(shell mkdir -p $(HOST_PATH))
+
+# Check if HOST_PATH directory exists before any build targets
+ifeq ($(wildcard $(HOST_PATH)),)
+$(error $(shell echo "\033[0;31mHOST_PATH directory '$(HOST_PATH)' does not exist\033[0m"))
+endif
+
 # Make target to echo variable values
 show-variables:
 	@echo "USER_UID: $(USER_UID)"
@@ -30,6 +39,8 @@ show-variables:
 	@echo "IMAGE_NAME: $(IMAGE_NAME)"
 	@echo "CONTAINER_NAME: $(CONTAINER_NAME)"
 	@echo "HOST_PATH: $(HOST_PATH)"
+	@echo "HOST_PATH: $(CONT_APP_MNT)"
+
 
 # Make target to build the Docker image
 build:
@@ -41,6 +52,7 @@ build:
 		--build-arg USER_SHELL=$(USER_SHELL) \
 		--build-arg USER_HOME=$(USER_HOME) \
 		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
+		--build-arg CONT_APP_MNT=${CONT_APP_MNT} \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
 # Make target to rebuild the Docker image with --no-cache option
@@ -53,6 +65,7 @@ rebuild:
 		--build-arg USER_SHELL=$(USER_SHELL) \
 		--build-arg USER_HOME=$(USER_HOME) \
 		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
+		--build-arg CONT_APP_MNT=${CONT_APP_MNT} \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
 # Make target to build the Docker image with PIP upgrade for things in the requirements.txt file
@@ -65,6 +78,7 @@ build_upgrade:
 		--build-arg USER_SHELL=$(USER_SHELL) \
 		--build-arg USER_HOME=$(USER_HOME) \
 		--build-arg PIP_UPGRADE="true" \
+		--build-arg CONT_APP_MNT=${CONT_APP_MNT} \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
 # Make target to just run the Docker container with no mounts
@@ -79,7 +93,7 @@ runm:
 	docker run -it --rm \
 	--user ${USER_UID}:${USER_GROUP_GID} \
 	--name ${CONTAINER_NAME} \
-	--volume ./app:/app/ \
+	--volume ${HOST_PATH}:${CONT_APP_MNT} \
 	${IMAGE_NAME}:${IMAGE_VERSION}
 
 # Make target to run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_NAME}
@@ -87,7 +101,7 @@ runmh:
 	docker run -it --rm \
 	--user ${USER_UID}:${USER_GROUP_GID} \
 	--name ${CONTAINER_NAME} \
-	--volume ./app:/app/ \
+	--volume ${HOST_PATH}:${CONT_APP_MNT} \
 	--volume /home/${USER_NAME}:/mnt/${USER_NAME}:ro \
 	${IMAGE_NAME}:${IMAGE_VERSION}
 
