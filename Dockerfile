@@ -80,8 +80,8 @@ USER ${USER_NAME}
 # symlink ~/.ssh and .gitconfigfrom mounted $HOME
 RUN echo 'pcol' >> ~/.bashrc
 RUN test -d /mnt/${USERNAME} && rm -rfv ~/.ssh
-RUN test -d /mnt/${USERNAME} && ln -s /mnt/${USER_NAME}/.ssh ~/
-RUN test -d /mnt/${USERNAME} && ln -s /mnt/${USER_NAME}/.gitconfig ~/
+RUN test -d /mnt/${USERNAME} && ln -s /mnt/${USER_HOME}/.ssh ~/
+RUN test -d /mnt/${USERNAME} && ln -s /mnt/${USER_HOME}/.gitconfig ~/
 
 # if the /$HOME/bin directory exists, link it so .bashrc picks it up and puts in the path
 RUN if [ -d "/mnt/${USER_NAME}/bin" ]; then ln -s "/mnt/${USER_NAME}/bin" ~/; fi
