@@ -1,9 +1,9 @@
 # Makefile for running a Docker image used for development
 
 # Define variables for Docker image and container
-IMAGE_NAME     = dev-test-image
+IMAGE_NAME     = $(shell echo $$PROJECT)-image
 IMAGE_VERSION  = latest
-CONTAINER_NAME = dev-test-container
+CONTAINER_NAME = $(shell echo $$PROJECT)-container
 HOST_PATH      = ./apps
 CONT_APP_MNT   = /apps
 USER_UID       := $(shell id -u)
@@ -18,6 +18,11 @@ AWS_REGION     = "us-east-2"
 # get AWS_REGION from the user's shell environment if it is set
 ifeq ($(AWS_REGION),)
     AWS_REGION := $(shell aws configure get region)
+endif
+
+# if PROJECT environment variable is not set, warn and exit
+ifndef PROJECT
+$(error $(shell echo "\033[0;31mPlease export a PROJECT environment variable to name your image/container for this project.\033[0m"))
 endif
 
 # create teh HOST_PATH directory
