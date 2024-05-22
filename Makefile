@@ -101,13 +101,13 @@ runm:
 	--volume ${HOST_PATH}:${CONT_APP_MNT} \
 	${IMAGE_NAME}:${IMAGE_VERSION}
 
-# Make target to run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_NAME}
+# Make target to run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_HOME}
 runmh:
 	docker run -it --rm \
 	--user ${USER_UID}:${USER_GROUP_GID} \
 	--name ${CONTAINER_NAME} \
 	--volume ${HOST_PATH}:${CONT_APP_MNT} \
-	--volume /home/${USER_NAME}:/mnt/${USER_NAME}:ro \
+	--volume ${USER_HOME}:/mnt/${USER_HOME}:ro \
 	${IMAGE_NAME}:${IMAGE_VERSION}
 
 # Make target to connect to the running container
