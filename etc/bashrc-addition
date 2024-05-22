@@ -61,8 +61,9 @@ alias gpusha='git push --all origin'
 alias glog='git log --pretty --oneline'
 # aws cli aliases 
 alias asl="aws s3 ls"
-# terraform
-alias tf="terraform"
+alias aan="acc=\$(aws sts get-caller-identity --query \"Account\" --output text) && echo Retrieved AWS account: \$acc || echo 'Error retrieving AWS account'"
+# terraform/tofu
+alias tf="tofu"
 
 
 
