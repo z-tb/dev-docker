@@ -73,18 +73,21 @@ RUN cd /tmp/ && curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/i
 # needed with OpenTofu ?
 RUN apt purge lsb-release -y && apt autoremove -y
 
+# create the home directory mount point
+RUN mkdir -p /mnt/${USER_HOME}
+
 # switch to non-root build user for shell
 USER ${USER_NAME}
 
 # enable custom prompt via alias in /etc/bash.bashrc
 # symlink ~/.ssh and .gitconfigfrom mounted $HOME
 RUN echo 'pcol' >> ~/.bashrc
-RUN test -d /mnt/${USERNAME} && rm -rfv ~/.ssh
-RUN test -d /mnt/${USERNAME} && ln -s /mnt/${USER_HOME}/.ssh ~/
-RUN test -d /mnt/${USERNAME} && ln -s /mnt/${USER_HOME}/.gitconfig ~/
+RUN test -d /mnt/${USER_HOME} && rm -rfv ~/.ssh
+RUN test -d /mnt/${USER_HOME} && ln -s /mnt/${USER_HOME}/.ssh ~/
+RUN test -d /mnt/${USER_HOME} && ln -s /mnt/${USER_HOME}/.gitconfig ~/
 
 # if the /$HOME/bin directory exists, link it so .bashrc picks it up and puts in the path
-RUN if [ -d "/mnt/${USER_NAME}/bin" ]; then ln -s "/mnt/${USER_NAME}/bin" ~/; fi
+RUN if [ -d "/mnt/${USER_HOME}/bin" ]; then ln -s "/mnt/${USER_HOME}/bin" ~/; fi
 
 # add ~/.aws/credentials and ~/.aws/config
 RUN mkdir -p ~/.aws
