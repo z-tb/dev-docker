@@ -22,7 +22,7 @@ RUN cat /tmp/bashrc-addition >> /etc/bash.bashrc && \
 WORKDIR ${CONT_APP_MNT}
 
 # python reqs - Python 3 and pip
-COPY requirements.txt ${CONT_APP_DIR}/requirements.txt
+COPY requirements.txt ${CONT_APP_MNT}/requirements.txt
 
 # install or upgrade via pip
 RUN if [ "${PIP_UPGRADE}" = "true" ]; then \
