@@ -9,6 +9,7 @@ ARG USER_NAME
 ARG USER_SHELL
 ARG USER_HOME
 ARG PIP_UPGRADE
+ARG CONT_APP_MNT
 
 # Copy custom bash.bashrc additions into the image
 COPY etc/bashrc-addition /tmp/
@@ -18,7 +19,7 @@ RUN cat /tmp/bashrc-addition >> /etc/bash.bashrc && \
     rm /tmp/bashrc-addition 
 
 # Set the working directory to the shared app directory
-WORKDIR ${CONT_APP_DIR}
+WORKDIR ${CONT_APP_MNT}
 
 # python reqs - Python 3 and pip
 COPY requirements.txt ${CONT_APP_DIR}/requirements.txt
