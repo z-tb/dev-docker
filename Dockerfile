@@ -74,6 +74,13 @@ RUN cd /tmp/ && curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/i
 # needed with OpenTofu ?
 RUN apt purge lsb-release -y && apt autoremove -y
 
+
+# Install GCP SDK
+RUN wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+RUN echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN apt-get update && apt-get install google-cloud-sdk -y
+
+
 # create the home directory mount point
 RUN mkdir -p /mnt/${USER_HOME}
 
