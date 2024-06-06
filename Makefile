@@ -1,9 +1,21 @@
 # Makefile for running a Docker image used for development
+# default to dev-test if PROJECT is not set
+DEFAULT_PROJECT= dev-test
+
+# if PROJECT is exported into environment, use it instead, otherwise warn about using default
+ifndef PROJECT
+$(info $(shell echo "\033[0;33mPROJECT environment variable is not set. Using default value: $(DEFAULT_PROJECT)\033[0m"))
+PROJECT := $(DEFAULT_PROJECT)
+else
+$(info $(shell echo "\033[0;32mUsing PROJECT $(PROJECT) from environment\033[0m"))
+endif
 
 # Define variables for Docker image and container
-IMAGE_NAME     = $(shell echo $$PROJECT)-image
-IMAGE_VERSION  = latest
-CONTAINER_NAME = $(shell echo $$PROJECT)-container
+IMAGE_NAME     := $(PROJECT)-image
+IMAGE_VERSION  := latest
+CONTAINER_NAME := $(PROJECT)-container
+
+
 HOST_PATH      = ./apps
 CONT_APP_MNT   = /apps
 USER_UID       := $(shell id -u)
@@ -20,10 +32,6 @@ ifeq ($(AWS_REGION),)
     AWS_REGION := $(shell aws configure get region)
 endif
 
-# if PROJECT environment variable is not set, warn and exit
-ifndef PROJECT
-$(error $(shell echo "\033[0;31mPlease export a PROJECT environment variable to name your image/container for this project.\033[0m"))
-endif
 
 # create teh HOST_PATH directory
 $(shell mkdir -p $(HOST_PATH))
