@@ -51,7 +51,6 @@ alias shad='ssh-add  ~/.ssh/*_[erd]*sa'
 alias rm="rm -v"
 alias cp="cp -v"
 # git aliases
-alias gbr="git branch -a"
 alias gco="git checkout"
 alias gst="git status -s"
 alias gls="git ls-tree --full-tree -r --name-only HEAD"
@@ -59,6 +58,14 @@ alias gpull='git pull origin `get_git_branch`'
 alias gpush='git push origin `get_git_branch`; git push origin --tags'
 alias gpusha='git push --all origin'
 alias glog='git log --pretty --oneline'
+
+gbr() {
+    remote_branches="$(git ls-remote --heads origin)"
+    git branch -a
+    echo -e "\033[38;5;202m+++ REMOTE BRANCHES +++\033[0m"
+    echo -e "\033[38;5;208m$remote_branches\033[0m"
+}
+
 # aws cli aliases 
 alias asl="aws s3 ls"
 alias aan="acc=\$(aws sts get-caller-identity --query \"Account\" --output text) && echo Retrieved AWS account: \$acc || echo 'Error retrieving AWS account'"
