@@ -24,14 +24,16 @@ USER_GROUP_NAME := $(shell id -gn)
 USER_NAME      := $(shell id -un)
 USER_SHELL     := $(shell echo $$SHELL)
 USER_HOME      := $(shell echo $$HOME)
+
+# eg: make build -e PIP_UPGRADE=true
 PIP_UPGRADE    := "false"
+
 AWS_REGION     = "us-east-2"
 
 # get AWS_REGION from the user's shell environment if it is set
 ifeq ($(AWS_REGION),)
     AWS_REGION := $(shell aws configure get region)
 endif
-
 
 # create teh HOST_PATH directory
 $(shell mkdir -p $(HOST_PATH))

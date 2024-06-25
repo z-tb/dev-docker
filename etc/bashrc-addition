@@ -98,5 +98,6 @@ function pcol() {
     export PS1
 }
 
+export TZ="America/Chicago"
 export EDITOR=vim
 
