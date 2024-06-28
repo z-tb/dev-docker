@@ -81,7 +81,12 @@ RUN sudo apt update && sudo apt install terraform
 # needed with OpenTofu ?
 RUN apt purge lsb-release -y && apt autoremove -y
 
-
+# install v2 of aws cli
+# https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.htm
+RUN cd /tmp && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install
+ 
 # Install GCP SDK
 RUN wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 RUN echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
