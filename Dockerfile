@@ -26,7 +26,9 @@ COPY requirements.txt ${CONT_APP_MNT}/requirements.txt
 
 # install or upgrade via pip
 RUN if [ "${PIP_UPGRADE}" = "true" ]; then \
+        pip3 install --upgrade pip; \
         pip3 install --upgrade -r requirements.txt; \
+        pip3 freeze > requirements.txt; \
     else \
         pip3 install -r requirements.txt; \
     fi
