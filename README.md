@@ -54,6 +54,11 @@ The Dockerfile sets up a lightweight Python development environment based on the
 
 A Makefile manages the build and run process. This provides simple commands for building, running, and cleaning up the Docker containers and images.
 
+For more insight into the docker build proceses, you can export `DEBUG=1` or declare it along with the build command
+```bash
+DEBUG=1 make build|rebuild
+```
+
 ### Makefile Usage
 
 1. **Build Docker Image:**
