@@ -5,9 +5,14 @@ DEFAULT_PROJECT= dev-test
 # if PROJECT is exported into environment, use it instead, otherwise warn about using default
 ifndef PROJECT
 $(info $(shell echo "\033[0;33mPROJECT environment variable is not set. Using default value: $(DEFAULT_PROJECT)\033[0m"))
-PROJECT := $(DEFAULT_PROJECT)
+	PROJECT := $(DEFAULT_PROJECT)
 else
-$(info $(shell echo "\033[0;32mUsing PROJECT $(PROJECT) from environment\033[0m"))
+	$(info $(shell echo "\033[0;32mUsing PROJECT $(PROJECT) from environment\033[0m"))
+endif
+
+# if DEBUG=1 is exported, then use additional options for docker build
+ifeq ($(DEBUG),1)
+	DEBUG_OPTS = --progress=plain
 endif
 
 # Define variables for Docker image and container
@@ -40,8 +45,9 @@ $(shell mkdir -p $(HOST_PATH))
 
 # Check if HOST_PATH directory exists before any build targets
 ifeq ($(wildcard $(HOST_PATH)),)
-$(error $(shell echo "\033[0;31mHOST_PATH directory '$(HOST_PATH)' does not exist\033[0m"))
+	$(error $(shell echo "\033[0;31mHOST_PATH directory '$(HOST_PATH)' does not exist\033[0m"))
 endif
+
 
 # Make target to echo variable values
 show-variables:
@@ -59,7 +65,7 @@ show-variables:
 
 # Make target to build the Docker image
 build:
-	docker build \
+	docker build $(DEBUG_OPTS) \
 		--build-arg USER_UID=$(USER_UID) \
 		--build-arg USER_GROUP_GID=$(USER_GROUP_GID) \
 		--build-arg USER_GROUP_NAME=$(USER_GROUP_NAME) \
@@ -72,7 +78,7 @@ build:
 
 # Make target to rebuild the Docker image with --no-cache option
 rebuild:
-	docker build --no-cache \
+	docker build --no-cache $(DEBUG_OPTS) \
 		--build-arg USER_UID=$(USER_UID) \
 		--build-arg USER_GROUP_GID=$(USER_GROUP_GID) \
 		--build-arg USER_GROUP_NAME=$(USER_GROUP_NAME) \
@@ -85,7 +91,7 @@ rebuild:
 
 # Make target to build the Docker image with PIP upgrade for things in the requirements.txt file
 build_upgrade:
-	docker build \
+	docker build$(DEBUG_OPTS) \
 		--build-arg USER_UID=$(USER_UID) \
 		--build-arg USER_GROUP_GID=$(USER_GROUP_GID) \
 		--build-arg USER_GROUP_NAME=$(USER_GROUP_NAME) \

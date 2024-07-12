@@ -1,6 +1,8 @@
 # Use the official Ubuntu base image
 FROM python:3.8-slim-buster
 
+RUN python --version
+
 # build arguments from Makefile
 ARG USER_UID
 ARG USER_GROUP_GID
