@@ -35,12 +35,14 @@ RUN if [ "${PIP_UPGRADE}" = "true" ]; then \
         pip3 install -r requirements.txt; \
     fi
 
+# don't bother prompting with installer questions
+ENV DEBIAN_FRONTEND=noninteractive
+
 # get latest updates
 RUN apt update && apt dist-upgrade -y
 
 # install some support packages, and sudo
 RUN apt-get install sudo \
-    ansible \
     net-tools \
     lsb-release \
     curl \
@@ -51,13 +53,15 @@ RUN apt-get install sudo \
     make \
     nano \
     procps \
-    pylint \
     tree \
     rsync \
     iputils-ping \
+    pylint \
     zsh \
     zip \
     git -y
+
+RUN python --version
 
 # create a user account, non-root, of the user running the build
 #   user gets supplementary sudo group membership
