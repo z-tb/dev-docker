@@ -18,11 +18,13 @@ isort==5.13.2
 jmespath==1.0.1
 mccabe==0.7.0
 packaging==24.1
+PyYAML==6.0.1
 platformdirs==4.2.2
 pyasn1==0.6.0
 pycparser==2.22
 pylint==3.2.5
 python-dateutil==2.9.0.post0
+requests==2.32.3
 resolvelib==0.8.1
 rsa==4.7.2
 s3transfer==0.8.2

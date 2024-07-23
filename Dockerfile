@@ -44,6 +44,8 @@ RUN apt update && apt dist-upgrade -y
 # install some support packages, and sudo
 RUN apt-get install sudo \
     net-tools \
+    dnsutils \
+    mandoc \
     lsb-release \
     curl \
     gnupg \
