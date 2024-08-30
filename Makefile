@@ -58,6 +58,7 @@ show-variables:
 	@echo "USER_SHELL: $(USER_SHELL)"
 	@echo "USER_HOME: $(USER_HOME)"
 	@echo "IMAGE_NAME: $(IMAGE_NAME)"
+	@echo "IMAGE_VERSION: $(IMAGE_VERSION)"
 	@echo "CONTAINER_NAME: $(CONTAINER_NAME)"
 	@echo "HOST_PATH: $(HOST_PATH)"
 	@echo "HOST_PATH: $(CONT_APP_MNT)"
@@ -74,6 +75,8 @@ build:
 		--build-arg USER_HOME=$(USER_HOME) \
 		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
 		--build-arg CONT_APP_MNT=${CONT_APP_MNT} \
+		--build-arg IMAGE_NAME=${IMAGE_NAME} \
+		--build-arg IMAGE_VERSION=${IMAGE_VERSION} \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
 # Make target to rebuild the Docker image with --no-cache option
@@ -87,6 +90,8 @@ rebuild:
 		--build-arg USER_HOME=$(USER_HOME) \
 		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
 		--build-arg CONT_APP_MNT=${CONT_APP_MNT} \
+		--build-arg IMAGE_NAME=${IMAGE_NAME} \
+		--build-arg IMAGE_VERSION=${IMAGE_VERSION} \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
 # Make target to build the Docker image with PIP upgrade for things in the requirements.txt file
@@ -100,11 +105,14 @@ build_upgrade:
 		--build-arg USER_HOME=$(USER_HOME) \
 		--build-arg PIP_UPGRADE="true" \
 		--build-arg CONT_APP_MNT=${CONT_APP_MNT} \
+		--build-arg IMAGE_NAME=${IMAGE_NAME} \
+		--build-arg IMAGE_VERSION=${IMAGE_VERSION} \
 		-t $(IMAGE_NAME):${IMAGE_VERSION} -f ./Dockerfile .
 
 # Make target to just run the Docker container with no mounts
 run:
 	docker run -it --rm \
+	--hostname $(IMAGE_NAME) \
 	--user ${USER_UID}:${USER_GROUP_GID}  \
 	--name $(CONTAINER_NAME) \
 	$(IMAGE_NAME):${IMAGE_VERSION}
@@ -112,6 +120,7 @@ run:
 # Make target to run the Docker container with volume mounted app directory
 runm:
 	docker run -it --rm \
+	--hostname $(IMAGE_NAME) \		
 	--user ${USER_UID}:${USER_GROUP_GID} \
 	--name ${CONTAINER_NAME} \
 	--volume ${HOST_PATH}:${CONT_APP_MNT} \
@@ -120,6 +129,7 @@ runm:
 # Make target to run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_HOME}
 runmh:
 	docker run -it --rm \
+	--hostname $(IMAGE_NAME) \
 	--user ${USER_UID}:${USER_GROUP_GID} \
 	--name ${CONTAINER_NAME} \
 	--volume ${HOST_PATH}:${CONT_APP_MNT} \
@@ -142,13 +152,14 @@ clean: stop
 # Display help message
 help:
 	@echo "Available targets:"
-	@echo "  make build       - Build the Docker image"
-	@echo "  make run         - Run the Docker container"
-	@echo "  make runm        - Run the Docker container with volume mounted app directory"
-	@echo "  make runmh       - Run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_NAME}"
-	@echo "  make connect	  - Connect to the running container"
-	@echo "  make stop        - Stop the Docker container"
-	@echo "  make clean       - Stop and remove the Docker container, and remove the Docker image"
-	@echo "  make help        - Display this help message"
-	@echo "  make rebuild     - Build the docker image with --no-cache option"
+	@echo "  make build       	- Build the Docker image"
+	@echo "  make run         	- Run the Docker container"
+	@echo "  make runm        	- Run the Docker container with volume mounted app directory"
+	@echo "  make runmh       	- Run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_NAME}"
+	@echo "  make connect	  	- Connect to the running container"
+	@echo "  make stop        	- Stop the Docker container"
+	@echo "  make clean       	- Stop and remove the Docker container, and remove the Docker image"
+	@echo "  make help        	- Display this help message"
+	@echo "  make rebuild     	- Build the docker image with --no-cache option"
+	@echo "  make build_upgrade - Build the docker image with OS and PIP upgrade for things in the requirements.txt file"
 # vim: set ts=4 sw=4 tw=0 noet :

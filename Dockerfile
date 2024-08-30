@@ -1,5 +1,5 @@
 # Use the official Ubuntu base image
-FROM python:3.8-slim-buster
+FROM python:3.10-slim-bullseye
 
 RUN python --version
 
@@ -12,6 +12,9 @@ ARG USER_SHELL
 ARG USER_HOME
 ARG PIP_UPGRADE
 ARG CONT_APP_MNT
+ARG IMAGE_VERSION
+ARG IMAGE_NAME
+
 
 # Copy custom bash.bashrc additions into the image
 COPY etc/bashrc-addition /tmp/
@@ -65,6 +68,7 @@ RUN apt-get install sudo \
 
 RUN python --version
 
+
 # create a user account, non-root, of the user running the build
 #   user gets supplementary sudo group membership
 RUN groupadd -g ${USER_GROUP_GID} ${USER_GROUP_NAME} \
@@ -82,7 +86,7 @@ RUN cd /tmp/ && curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/i
    ./install-opentofu.sh --install-method deb
 #rm install-opentofu.sh
 
-# install Terraform
+# install Terraform - works on Bullseye now
 RUN wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 RUN echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 RUN sudo apt update && sudo apt install terraform

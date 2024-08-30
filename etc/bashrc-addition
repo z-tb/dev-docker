@@ -18,7 +18,7 @@ get_git_branch()
 }
 
 #------------------------------------------------------------------
-# display git branch in prompt if cwd is a repo. color change if 
+# display git branch in prompt if cwd is a repo. color change if
 # modifications present
 #------------------------------------------------------------------
 display_git_branch()
@@ -30,6 +30,39 @@ display_git_branch()
    test ! -z "$b" &&  echo -e "$bcolor $b \033[0;00;0m"
 }
 
+
+#------------------------------------------------------------------
+# launch ssh-agent, if not running and ssh-add all private keys
+#------------------------------------------------------------------
+shad() {
+    # expected paths for ssh-agent
+    local ssh_agent_paths=("/bin/ssh-agent" "/usr/bin/ssh-agent")
+
+    # Check for and start the SSH agent using the absolute paths
+    local ssh_agent_found=false
+    for path in "${ssh_agent_paths[@]}"; do
+        if [ -x "$path" ]; then
+            eval "$($path -s)"
+            ssh_agent_found=true
+            break
+        fi
+    done
+
+    if [ "$ssh_agent_found" = false ]; then
+        echo "No valid ssh-agent found at expected paths."
+        return 1
+    fi
+
+    local ssh_dir="$HOME/.ssh"
+
+    # Loop through all private key files that do not end in .pub
+    for key in "$ssh_dir"/id_*; do
+        if [ -f "$key" ] && [[ "$key" != *.pub ]]; then
+            ssh-add "$key"
+        fi
+    done
+}
+
 PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/home/shell"
 
 test -d ~/bin && PATH="$PATH:~/bin"
@@ -39,7 +72,7 @@ export PATH
 alias ds="find .  -maxdepth 1 -type d -exec du -smh '{}' \;"
 alias dri="ls -lart --color=auto"
 alias dir="ls -lart --color=auto"
-# iptables 
+# iptables
 alias ipt="iptables --line-numbers -nvL"
 alias ipn="iptables --line-numbers -nvL -t nat"
 alias ipt6="ip6tables --line-numbers -nvL"
@@ -47,7 +80,6 @@ alias ipn6="ip6tables --line-numbers -nvL -t nat"
 # command line helpers
 alias ns="netstat -topnavelu"
 alias dmesg="dmesg -T"
-alias shad='ssh-add  ~/.ssh/*_[erd]*sa'
 alias rm="rm -v"
 alias cp="cp -v"
 # git aliases
@@ -66,7 +98,7 @@ gbr() {
     echo -e "\033[38;5;208m$remote_branches\033[0m"
 }
 
-# aws cli aliases 
+# aws cli aliases
 alias asl="aws s3 ls"
 alias aan="acc=\$(aws sts get-caller-identity --query \"Account\" --output text) && echo Retrieved AWS account: \$acc || echo 'Error retrieving AWS account'"
 # terraform/tofu
