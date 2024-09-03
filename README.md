@@ -1,4 +1,4 @@
-# Dockerized Dev Environment
+# Dockerized Dev Environment (devops branch)
 
 This project configures a dockerized development environment for AWS usage. The `devops` branch contains a more specific AWS build with additional functionality. There are several advatanges to developing in these containers over traditional host-based development environments. These advantages include:
 
@@ -13,14 +13,20 @@ This project configures a dockerized development environment for AWS usage. The 
 * **Workstation Stability**: Software installed in the Docker container does not impact the host operating system.
 * **Elevated Access**: Docker provides an alternative for obtaining elevated access on a host system.
 
+The `devops` branch contains additional `make` targets, Python libraries and additional utilities to support DevOps workflows.
+
 ## Usage
 Obviously, `docker` and it's related support software needs to be installed on the host system. Additionally, the `make` utility is used to assist in managing the build environment, but isn't necessary. You could enter the build commands manually of course.
 
 A volume mount "app" directory is enabled at docker runtime. This enables the full capabilities of an IDE on the host system while writing to a shared location inside the running Docker container. The application being developed is run within the container, where all supporting software is installed. Run `make runm` to volume mount the app directory within the container. Several other `make` targets exist for different functionaly such as running the container with permissions of the user launching docker instead of just `root`.
 
+Additionally, the `runmh` make target will R/O mount the home directory of the build user into `/mnt/` of the container. This can be essential for operations needed a `~/.gitconfig` or `~/.ssh` configuration. The read-only mount restricts any changes to the home directory from within the container. 
+
 ## Permissions
 
-If the app directory is created by the user running the docker build, it should be writable by the user in the container as well as user on the host system. If you run into odd permission issues for some reason, you may need to experiment with the permissions.
+If the app directory is created by the user running the docker build, it will be writable by the user in the container, as well as user on the host system. If you run into odd permission issues for some reason, you may need to experiment with the permissions.
+
+Of note, if using volum mounts, the `docker` daemon will create the directories on the host system with root ownership. This isn't ideal, so the Makefile attempts to create these as the user running `make` at build/run time.
 
 Docker may not allow you to `sudo` within the container, failing with the error message below. If this is the case, check that the docker filesystem (`/var/lib/docker` on debian/ubuntu) on the host is mounted without the `nosuid` option. Having this mount option may cause the error message below. I remedied this by creating a separate LVM volume for docker on my docker host and mounting it on `/var/lib/docker` without the `nosuid` option. The `nosuid` option prevents programs on a filesystem from being set with a filesystem flag to allow them to execute with root privilege when run. It's best practice to leave this option intact, especially for a directory like `/var` where many different processes are allowed to write files.  Opening up only the `/var/lib/docker` directory provides usability with reduced risk to everything under the `/var` directory.
    ``` bash
@@ -56,6 +62,11 @@ The Dockerfile sets up a lightweight Python development environment based on the
 
 A Makefile manages the build and run process. This provides simple commands for building, running, and cleaning up the Docker containers and images.
 
+For more insight into the docker build proceses, you can export `DEBUG=1` or declare it along with the build command
+```bash
+DEBUG=1 make build|rebuild
+```
+
 ### Makefile Usage
 
 1. **Build Docker Image:**
@@ -82,7 +93,17 @@ A Makefile manages the build and run process. This provides simple commands for 
 
     This command runs a Docker container with volume mounting, allowing you to mount the `./app` directory from the host to `/app/` in the container. It opens a bash shell in the container.
 
-4. **Stop Docker Container:**
+4. **Run Docker Container with Volume Mount (/app and /mnt/$HOME)**
+
+    ```bash
+    make runmh
+    ```
+
+    Runs a Docker container with volume mounting of `./app` on `/app` from the host and `$HOME` of the host mounted Read-Only to `/mnt/$HOME` in the container. Also opens a bash shell.
+
+    You could add symlinks in the container to point to things like /mnt/$HOME/.ssh (for git over ssh)
+
+5. **Stop Docker Container:**
 
     ```bash
     make stop
@@ -90,13 +111,38 @@ A Makefile manages the build and run process. This provides simple commands for 
 
     This command stops the running Docker container named `dev-test-container`.
 
-5. **Clean Up:**
+6. **Clean Up:**
 
     ```bash
     make clean
     ```
 
     This command removes the Docker container (`dev-test-container`) and the Docker image (`dev-test-image`).
+
+7. **Connect to running container:**
+
+    ```bash
+    make connect
+    ```
+
+    This command connects to the running Docker container (`dev-test-container`).
+
+8. **Upgrade via pip when building:**
+
+    ```bash
+    make build_upgrade
+    ```
+
+    This command instructs pip to upgrade the packages found in `requirements.txt` to their latest version when builduing the Docker container.
+
+
+9. **Build using the --no-cache options:**
+
+    ```bash
+    make rebuild
+    ```
+
+    This command instructs docker to build the image without using the Docker build cache. Can be useful for troubleshooting to ensure a consistent build when other things are questionable.
 
 ### Variables
 
@@ -116,8 +162,12 @@ A Makefile manages the build and run process. This provides simple commands for 
 - `build`: Build the Docker image.
 - `run`: Run the Docker container.
 - `runm`: Run the Docker container with volume mounting.
+- `runmh`: Run the Docker container with volume mounting of ./app on /app, and $HOME on /mnt/$HOME.
 - `stop`: Stop the running Docker container.
 - `clean`: Remove the Docker container and image.
+- `connect`: Connect to the running Docker container.
+- `build_upgrade`: Instruct pip to install/upgrade packages in requirements.txt.
+- `rebuild`: Build the docker image using `--no-cache`
 
 ```bash
 # Example usage:
@@ -126,3 +176,6 @@ A Makefile manages the build and run process. This provides simple commands for 
 #   make runm
 #   make stop
 #   make clean
+#   make connect
+#   make build_upgrade
+#   make rebuild

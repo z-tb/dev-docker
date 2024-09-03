@@ -1,5 +1,7 @@
 # Use the official Ubuntu base image
-FROM python:3.8-slim-buster
+FROM python:3.10-slim-bullseye
+
+RUN python --version
 
 # build arguments from Makefile
 ARG USER_UID
@@ -8,6 +10,11 @@ ARG USER_GROUP_NAME
 ARG USER_NAME
 ARG USER_SHELL
 ARG USER_HOME
+ARG PIP_UPGRADE
+ARG CONT_APP_MNT
+ARG IMAGE_VERSION
+ARG IMAGE_NAME
+
 
 # Copy custom bash.bashrc additions into the image
 COPY etc/bashrc-addition /tmp/
@@ -17,17 +24,50 @@ RUN cat /tmp/bashrc-addition >> /etc/bash.bashrc && \
     rm /tmp/bashrc-addition 
 
 # Set the working directory to the shared app directory
-WORKDIR /app
+WORKDIR ${CONT_APP_MNT}
 
 # python reqs - Python 3 and pip
-COPY requirements.txt /app/requirements.txt
-RUN pip3 install -r requirements.txt
+COPY requirements.txt ${CONT_APP_MNT}/requirements.txt
+
+# install or upgrade via pip
+RUN if [ "${PIP_UPGRADE}" = "true" ]; then \
+        pip3 install --upgrade pip; \
+        pip3 install --upgrade -r requirements.txt; \
+        pip3 freeze > requirements.txt; \
+    else \
+        pip3 install -r requirements.txt; \
+    fi
+
+# don't bother prompting with installer questions
+ENV DEBIAN_FRONTEND=noninteractive
 
 # get latest updates
-RUN apt-get update && apt-get dist-upgrade -y
+RUN apt update && apt dist-upgrade -y
 
 # install some support packages, and sudo
-RUN apt-get install sudo net-tools vim nano zsh git -y
+RUN apt-get install sudo \
+    net-tools \
+    dnsutils \
+    mandoc \
+    lsb-release \
+    curl \
+    gnupg \
+    wget \
+    vim \
+    jq \
+    make \
+    nano \
+    procps \
+    tree \
+    rsync \
+    iputils-ping \
+    pylint \
+    zsh \
+    zip \
+    git -y
+
+RUN python --version
+
 
 # create a user account, non-root, of the user running the build
 #   user gets supplementary sudo group membership
@@ -40,8 +80,53 @@ RUN groupadd -g ${USER_GROUP_GID} ${USER_GROUP_NAME} \
 # with %sudo, you need to use 'newgrp' after login for some reason, so use the USERNAME here instead
 RUN echo "${USER_NAME} ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/sudo-users
 
+# install opentofu - Download the installer script:
+RUN cd /tmp/ && curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh && \
+   chmod +x install-opentofu.sh && \
+   ./install-opentofu.sh --install-method deb
+#rm install-opentofu.sh
+
+# install Terraform - works on Bullseye now
+RUN wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+RUN sudo apt update && sudo apt install terraform
+
+# lsb-release is needed by Terraform, but causes problems with Python modules
+# needed with OpenTofu ?
+RUN apt purge lsb-release -y && apt autoremove -y
+
+# install v2 of aws cli
+# https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.htm
+RUN cd /tmp && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install
+ 
+# Install GCP SDK
+RUN wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+RUN echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN apt-get update && apt-get install google-cloud-sdk -y
+
+
+# create the home directory mount point
+RUN mkdir -p /mnt/${USER_HOME}
+
 # switch to non-root build user for shell
 USER ${USER_NAME}
+
+# enable custom prompt via alias in /etc/bash.bashrc
+# symlink ~/.ssh and .gitconfigfrom mounted $HOME
+RUN echo 'pcol' >> ~/.bashrc
+RUN test -d /mnt/${USER_HOME} && rm -rfv ~/.ssh
+RUN test -d /mnt/${USER_HOME} && ln -s /mnt/${USER_HOME}/.ssh ~/
+RUN test -d /mnt/${USER_HOME} && ln -s /mnt/${USER_HOME}/.gitconfig ~/
+
+# if the /$HOME/bin directory exists, link it so .bashrc picks it up and puts in the path
+RUN if [ -d "/mnt/${USER_HOME}/bin" ]; then ln -s "/mnt/${USER_HOME}/bin" ~/; fi
+
+# add ~/.aws/credentials and ~/.aws/config
+RUN mkdir -p ~/.aws
+RUN printf "[default]\nregion = ${AWS_REGION}\noutput = json\n" > ${HOME}/.aws/config
+RUN printf "[default]\naws_access_key_id =\naws_secret_access_key =\n" > ${HOME}/.aws/credentials
 
 # Command to run when the container starts
 CMD ["/bin/bash"]
