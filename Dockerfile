@@ -61,7 +61,6 @@ RUN apt-get install sudo \
     tree \
     rsync \
     iputils-ping \
-    pylint \
     zsh \
     zip \
     git -y
@@ -109,6 +108,8 @@ RUN apt-get update && apt-get install google-cloud-sdk -y
 
 # create the home directory mount point
 RUN mkdir -p /mnt/${USER_HOME}
+
+# symlink python3.9 to /usr/local/bin/python3
 
 # switch to non-root build user for shell
 USER ${USER_NAME}

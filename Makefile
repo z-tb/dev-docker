@@ -1,6 +1,6 @@
 # Makefile for running a Docker image used for development
 # default to dev-test if PROJECT is not set
-DEFAULT_PROJECT= dev-test
+DEFAULT_PROJECT= devops
 
 # if PROJECT is exported into environment, use it instead, otherwise warn about using default
 ifndef PROJECT
