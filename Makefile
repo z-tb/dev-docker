@@ -63,6 +63,19 @@ show-variables:
 	@echo "HOST_PATH: $(HOST_PATH)"
 	@echo "HOST_PATH: $(CONT_APP_MNT)"
 
+# Make target to generate a Docker .env file
+env:
+	@echo "USER_UID=$(USER_UID)" > .env
+	@echo "USER_GROUP_GID=$(USER_GROUP_GID)" >> .env
+	@echo "USER_GROUP_NAME=$(USER_GROUP_NAME)" >> .env
+	@echo "USER_NAME=$(USER_NAME)" >> .env
+	@echo "USER_SHELL=$(USER_SHELL)" >> .env
+	@echo "USER_HOME=$(USER_HOME)" >> .env
+	@echo "PIP_UPGRADE=$(PIP_UPGRADE)" >> .env
+	@echo "CONT_APP_MNT=$(CONT_APP_MNT)" >> .env
+	@echo "IMAGE_VERSION=$(IMAGE_VERSION)" >> .env
+	@echo "IMAGE_NAME=$(IMAGE_NAME)" >> .env
+	@echo "AWS_REGION=$(AWS_REGION)" >> .env
 
 # Make target to build the Docker image
 build:
@@ -135,6 +148,17 @@ runmh:
 	--volume ${HOST_PATH}:${CONT_APP_MNT} \
 	--volume ${USER_HOME}:/mnt/${USER_HOME}:ro \
 	${IMAGE_NAME}:${IMAGE_VERSION}
+
+# Make target to run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_HOME}
+nodemh:
+	docker run -it --rm \
+    --hostname $(IMAGE_NAME) \
+    --user ${USER_UID}:${USER_GROUP_GID} \
+    --name ${CONTAINER_NAME} \
+    --volume ${HOST_PATH}:${CONT_APP_MNT} \
+    --volume ${USER_HOME}:/mnt/${USER_HOME}:ro \
+	-p 3000:3000 \
+    ${IMAGE_NAME}:${IMAGE_VERSION}
 
 # Make target to connect to the running container
 connect:
