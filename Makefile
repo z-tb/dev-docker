@@ -186,4 +186,5 @@ help:
 	@echo "  make help        	- Display this help message"
 	@echo "  make rebuild     	- Build the docker image with --no-cache option"
 	@echo "  make build_upgrade - Build the docker image with OS and PIP upgrade for things in the requirements.txt file"
+	@echo "  make env           - Create a .env file for use with docker compose"
 # vim: set ts=4 sw=4 tw=0 noet :
