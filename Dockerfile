@@ -41,10 +41,12 @@ RUN if [ "${PIP_UPGRADE}" = "true" ]; then \
 # don't bother prompting with installer questions
 ENV DEBIAN_FRONTEND=noninteractive
 
-# get latest updates
-RUN apt update && apt dist-upgrade -y
+# update apt
+RUN apt update
 
+# RUN apt update && apt dist-upgrade -y
 # install some support packages, and sudo
+
 RUN apt-get install sudo \
     net-tools \
     dnsutils \
@@ -60,6 +62,7 @@ RUN apt-get install sudo \
     procps \
     tree \
     rsync \
+    sqlite3 \
     iputils-ping \
     zsh \
     zip \
@@ -67,6 +70,24 @@ RUN apt-get install sudo \
 
 RUN python --version
 
+### golang https://go.dev/dl/ #
+ENV GO_VERSION 1.23.3 
+
+# download/install
+RUN wget https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp \
+    && tar -C /usr/local -xvzf /tmp/go${GO_VERSION}.linux-amd64.tar.gz \
+    && rm /tmp/go${GO_VERSION}.linux-amd64.tar.gz
+
+# Go env vars
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GOROOT=/usr/local/go
+
+# put it in the path
+RUN sudo ln -s ${GOROOT}/bin/go /usr/local/bin/
+
+# verify
+RUN go version
+###
 
 # create a user account, non-root, of the user running the build
 #   user gets supplementary sudo group membership
