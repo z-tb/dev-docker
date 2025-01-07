@@ -24,15 +24,15 @@ The `devops` branch contains additional `make` targets, Python libraries and add
 ## Usage
 Obviously, `docker` and it's related support software needs to be installed on the host system. Additionally, the `make` utility is used to assist in managing the build environment, but isn't necessary. You could enter the build commands manually of course.
 
-A volume mount "app" directory is enabled at docker runtime. This enables the full capabilities of an IDE on the host system while writing to a shared location inside the running Docker container. The application being developed is run within the container, where all supporting software is installed. Run `make runm` to volume mount the app directory within the container. Several other `make` targets exist for different functionaly such as running the container with permissions of the user launching docker instead of just `root`.
+A volume mount "app" directory is enabled at docker runtime. This enables a location on the host system to be used as a shared directory inside the running Docker container. Any development file can be written to this location for persistence when the container is not running. The make target `runm` enables this volume mount within the container. Several other `make` targets exist for different functionaly such as running the container with permissions of the user launching docker instead of just `root` and utilizing the `docker.socket` on the host system.
 
-Additionally, the `runmh` make target will R/O mount the home directory of the build user into `/mnt/` of the container. This can be essential for operations needed a `~/.gitconfig` or `~/.ssh` configuration. The read-only mount restricts any changes to the home directory from within the container. 
+Additionally, the `runmh` make target will R/O mount the home directory of the build user into `/mnt/` of the container. This can be essential for operations needed a `~/.gitconfig` or `~/.ssh` configuration. The read-only mount restricts any changes to the home directory from within the container.  Symlinks can be used to populate needed files from `/mnt/$HOME` into $HOME in the container.
 
 ## Permissions
 
 If the app directory is created by the user running the docker build, it will be writable by the user in the container, as well as user on the host system. If you run into odd permission issues for some reason, you may need to experiment with the permissions.
 
-Of note, if using volum mounts, the `docker` daemon will create the directories on the host system with root ownership. This isn't ideal, so the Makefile attempts to create these as the user running `make` at build/run time.
+Of note, if using volume mounts, the `docker` daemon will create the directories on the host system with root ownership. This isn't ideal, so the Makefile attempts to create these as the user running `make` at build/run time.
 
 Docker may not allow you to `sudo` within the container, failing with the error message below. If this is the case, check that the docker filesystem (`/var/lib/docker` on debian/ubuntu) on the host is mounted without the `nosuid` option. Having this mount option may cause the error message below. I remedied this by creating a separate LVM volume for docker on my docker host and mounting it on `/var/lib/docker` without the `nosuid` option. The `nosuid` option prevents programs on a filesystem from being set with a filesystem flag to allow them to execute with root privilege when run. It's best practice to leave this option intact, especially for a directory like `/var` where many different processes are allowed to write files.  Opening up only the `/var/lib/docker` directory provides usability with reduced risk to everything under the `/var` directory.
    ``` bash
