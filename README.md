@@ -1,17 +1,23 @@
 # Dockerized Dev Environment (devops branch)
 
-This project configures a dockerized development environment for devops usage. The `devops` branch contains a more specific build with additional functionality for Terraform, OpenTofu, GCP, AWS and running Docker from within in the container for use with aws `ECR`. There are several advatanges to developing in these containers over traditional host-based development environments. Especially when combined with VSCode Dev Containers, it's integrated debugger and Remote Development. These advantages include:
+This project configures a dockerized development environment for devops usage. The `devops` branch contains a more specific build with additional functionality for Terraform, OpenTofu, GCP, AWS and running Docker from within the container for use with aws `ECR`. There are several advatanges to developing in these containers over traditional host-based development environments. Especially when combined with VSCode Dev Containers, it's integrated debugger, and Remote Development. These advantages include:
 
 * **Isolation**: Installed software and modified resources are contained within the Docker container.
     * Egress filtering can be applied to the container using the host firewall
     * Drivers exist for docker which can further isolate the container (`IPVlan`, `MacVLAN`, etc)
 * **Consistency**: The Docker environment remains consistent across different machines and operating systems.
+    * All devs write and test code using the same runtime stack and OS
+    * Production can run from the same container
+* **Security**: The container environment can be provisioned within the context of organizational security goals.
+    * Easily scan, test and distribute vulnerability mitigations.
+    * Change management is simpler as tracking relates to a single environment
 * **Reproducibility**: Easily reproduce the environment using the docker configuration and Makefile.
 * **Ease of Setup**: Set up the environment once and share the configuration with everyone.
 * **Dependency Management**: Applications running in Docker have all necessary software provisioned for their functionality.
 * **VCS Integration**: The entire environment can be versioned in git for change tracking and collaboration.
 * **Workstation Stability**: Software installed in the Docker container does not impact the host operating system.
-* **Elevated Access**: Docker provides an alternative for obtaining elevated access on a host system.
+* **Elevated Access**: Docker provides an alternative for obtaining elevated access on a host system for managing software.
+    * easily experiment with new versions or stack dependencies
 
 The `devops` branch contains additional `make` targets, Python libraries and additional utilities to support DevOps workflows.
 
