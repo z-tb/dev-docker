@@ -1,6 +1,6 @@
 # Dockerized Dev Environment (devops branch)
 
-This project configures a dockerized development environment for AWS usage. The `devops` branch contains a more specific AWS build with additional functionality. There are several advatanges to developing in these containers over traditional host-based development environments. These advantages include:
+This project configures a dockerized development environment for devops usage. The `devops` branch contains a more specific build with additional functionality for Terraform, OpenTofu, GCP, AWS and running Docker from within in the container for use with aws `ECR`. There are several advatanges to developing in these containers over traditional host-based development environments. Especially when combined with VSCode Dev Containers, it's integrated debugger and Remote Development. These advantages include:
 
 * **Isolation**: Installed software and modified resources are contained within the Docker container.
     * Egress filtering can be applied to the container using the host firewall
