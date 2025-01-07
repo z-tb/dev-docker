@@ -30,6 +30,9 @@ USER_NAME      := $(shell id -un)
 USER_SHELL     := $(shell echo $$SHELL)
 USER_HOME      := $(shell echo $$HOME)
 
+DOCKER_SOCKET  := /var/run/docker.sock
+CONT_DOCKER_SOCKET := /var/run/docker.sock
+
 # eg: make build -e PIP_UPGRADE=true
 PIP_UPGRADE    := "false"
 
@@ -160,6 +163,17 @@ nodemh:
 	-p 3000:3000 \
     ${IMAGE_NAME}:${IMAGE_VERSION}
 
+# mount home directory with the docker daemon mounted in container for use with ECR/docker
+runmhdock:
+	docker run -it --rm \
+	--hostname $(IMAGE_NAME) \
+	--user ${USER_UID}:${USER_GROUP_GID} \
+	--name ${CONTAINER_NAME} \
+	--volume ${HOST_PATH}:${CONT_APP_MNT} \
+	--volume ${USER_HOME}:/mnt/${USER_HOME}:ro \
+	--volume ${DOCKER_SOCKET}:${CONT_DOCKER_SOCKET} \
+	${IMAGE_NAME}:${IMAGE_VERSION}
+
 # Make target to connect to the running container
 connect:
 	docker exec -it $(CONTAINER_NAME) /bin/bash
@@ -180,6 +194,8 @@ help:
 	@echo "  make run         	- Run the Docker container"
 	@echo "  make runm        	- Run the Docker container with volume mounted app directory"
 	@echo "  make runmh       	- Run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_NAME}"
+	@echo "  make runmhdock    	- Run the Docker container same as runmh, but with mounted docker socket from host"
+	@echo "  make nodemh    	- Expose port 3000 for use with nodejs"
 	@echo "  make connect	  	- Connect to the running container"
 	@echo "  make stop        	- Stop the Docker container"
 	@echo "  make clean       	- Stop and remove the Docker container, and remove the Docker image"
