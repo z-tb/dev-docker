@@ -127,6 +127,31 @@ RUN echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -
 RUN apt-get update && apt-get install google-cloud-sdk -y
 
 
+### docker install for ecr uploads/etc
+# Update the package index and install necessary packages
+RUN apt-get update && \
+    apt-get install -y ca-certificates curl gnupg lsb-release && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add Docker's official GPG key
+RUN install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
+    chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the Docker repository to Apt sources
+RUN echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Update the package index again and install Docker packages
+RUN apt-get update && \
+    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && \
+    rm -rf /var/lib/apt/lists/*
+
+### docker install
+
+
 # create the home directory mount point
 RUN mkdir -p /mnt/${USER_HOME}
 
