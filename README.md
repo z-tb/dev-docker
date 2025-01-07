@@ -39,6 +39,10 @@ Docker may not allow you to `sudo` within the container, failing with the error 
    docker sudo: effective uid is not 0, is /usr/bin/sudo on a file system with the 'nosuid' option set or an NFS file system without root privilege
    ```
 
+Be aware of the security issues with the `runmhdock` Make target which mounts the host `docker.socket` in the container as a volume mount. This was implemented to allow docker integration (eg:`docker login`) in the container for pushing images to AWS ECR. For this functionality to work, the user in the container must be able to read/write the volume mounted `docker.socket` on the host system. I've implemented this as the `docker` Posix group on the host, which is also created in the container. Group membership for accessing the socket is added in the Dockerfile. 
+
+Allowing access to `docker.socket` has the potential to not only interfere with any running container on the host, but compromise the entire host system. There is a project named [Docker Socket Proxy](https://github.com/Tecnativa/docker-socket-proxy) which attempts to minimize this attack surface but running any sort of un-trusted environment with a mounted `docker.socket` is a stupendously bad idea.
+
 ## Customization
 
 ### etc/bashrc-addition
