@@ -103,7 +103,41 @@ DEBUG=1 make build|rebuild
 
     You could add symlinks in the container to point to things like /mnt/$HOME/.ssh (for git over ssh)
 
-5. **Stop Docker Container:**
+
+5. **Run Docker Container with Volume Mount (/app and /mnt/$HOME) and Expose Port 3000:**
+
+    ```bash
+    make nodemh
+    ```
+
+    Runs a Docker container with volume mounting of `./app` on `/app` from the host and `$HOME` of the host mounted Read-Only to `/mnt/$HOME` in the container (with bash shell). Also exposes port 3000 for use with Node.js.
+
+6. **Run Docker Container with Volume Mount (/app and /mnt/$HOME) and Docker Socket:**
+
+    ```bash
+    make runmhdock
+    ```
+
+    Runs a Docker container with volume mounting of `./app` on `/app` from the host and `$HOME` of the host mounted Read-Only to `/mnt/$HOME` in the container. Also mounts the Docker socket from the host for use with ECR/Docker in the bash shell.
+
+7. **Show Variables:**
+
+    ```bash
+    make show-variables
+    ```
+
+    This command echoes the values of various environment variables used in the Makefile.
+
+8. **Generate .env File:**
+
+    ```bash
+    make env
+    ```
+
+    This command generates a `.env` file with the environment variables used in the Makefile for use with docker-compose.
+
+
+9. **Stop Docker Container:**
 
     ```bash
     make stop
@@ -111,7 +145,7 @@ DEBUG=1 make build|rebuild
 
     This command stops the running Docker container named `dev-test-container`.
 
-6. **Clean Up:**
+10. **Clean Up:**
 
     ```bash
     make clean
@@ -119,7 +153,7 @@ DEBUG=1 make build|rebuild
 
     This command removes the Docker container (`dev-test-container`) and the Docker image (`dev-test-image`).
 
-7. **Connect to running container:**
+11. **Connect to running container:**
 
     ```bash
     make connect
@@ -127,7 +161,7 @@ DEBUG=1 make build|rebuild
 
     This command connects to the running Docker container (`dev-test-container`).
 
-8. **Upgrade via pip when building:**
+12. **Upgrade via pip when building:**
 
     ```bash
     make build_upgrade
@@ -136,13 +170,17 @@ DEBUG=1 make build|rebuild
     This command instructs pip to upgrade the packages found in `requirements.txt` to their latest version when builduing the Docker container.
 
 
-9. **Build using the --no-cache options:**
+13. **Build using the --no-cache options:**
 
     ```bash
     make rebuild
     ```
 
     This command instructs docker to build the image without using the Docker build cache. Can be useful for troubleshooting to ensure a consistent build when other things are questionable.
+
+
+
+
 
 ### Variables
 
@@ -160,14 +198,19 @@ DEBUG=1 make build|rebuild
 ### Makefile Commands
 
 - `build`: Build the Docker image.
+- `build_upgrade`: Instruct pip to install/upgrade packages in requirements.txt.
+- `clean`: Remove the Docker container and image.
+- `connect`: Connect to the running Docker container.
+- `env` : Create a .env file for use with docker compose
+- `help`: View the make targets
+- `nodemh`: Expose port 3000 (for use with Nodejs)
 - `run`: Run the Docker container.
 - `runm`: Run the Docker container with volume mounting.
 - `runmh`: Run the Docker container with volume mounting of ./app on /app, and $HOME on /mnt/$HOME.
-- `stop`: Stop the running Docker container.
-- `clean`: Remove the Docker container and image.
-- `connect`: Connect to the running Docker container.
-- `build_upgrade`: Instruct pip to install/upgrade packages in requirements.txt.
+- `runmhdock`: Run the same way as runmh, but with the host docker.socket mounted in the container (be aware this is a vector for host compromise)
 - `rebuild`: Build the docker image using `--no-cache`
+- `stop`: Stop the running Docker container.
+
 
 ```bash
 # Example usage:
