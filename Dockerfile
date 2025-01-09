@@ -71,7 +71,7 @@ RUN apt-get install sudo \
 RUN python --version
 
 ### golang https://go.dev/dl/ #
-ENV GO_VERSION 1.23.3 
+ENV GO_VERSION=1.23.3 
 
 # download/install
 RUN wget https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp \
