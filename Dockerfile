@@ -1,5 +1,5 @@
-# Use the official Ubuntu base image
-FROM python:3.10-slim-bullseye
+# Use python slim 3.10 base image
+FROM python:3.10-slim
 
 RUN python --version
 
