@@ -32,6 +32,7 @@ USER_HOME      := $(shell echo $$HOME)
 
 DOCKER_SOCKET  := /var/run/docker.sock
 CONT_DOCKER_SOCKET := /var/run/docker.sock
+DOCKER_GID     := $(shell  getent group  docker | cut -d':' -f3)
 
 # eg: make build -e PIP_UPGRADE=true
 PIP_UPGRADE    := "false"
@@ -168,6 +169,8 @@ runmhdock:
 	docker run -it --rm \
 	--hostname $(IMAGE_NAME) \
 	--user ${USER_UID}:${USER_GROUP_GID} \
+	--group-add docker \
+	--group-add ${DOCKER_GID} \
 	--name ${CONTAINER_NAME} \
 	--volume ${HOST_PATH}:${CONT_APP_MNT} \
 	--volume ${USER_HOME}:/mnt/${USER_HOME}:ro \

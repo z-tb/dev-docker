@@ -19,7 +19,11 @@ This project configures a dockerized development environment for devops usage. T
 * **Elevated Access**: Docker provides an alternative for obtaining elevated access on a host system for managing software.
     * easily experiment with new versions or stack dependencies
 
-The `devops` branch contains additional `make` targets, Python libraries and additional utilities to support DevOps workflows.
+The `devops` branch contains additional `make` targets, Python libraries and additional utilities to support DevOps workflows. 
+
+Among the targets, a `runmhdock` target will volume mount `/var/run/docker.sock` in the container and provide R/W access to it using the `--group-add` argument on the command line. This leaves the host-side socket permissions un-modified and instead adds supplementary group permissions (`docker` GID) to the user running the container.
+
+This is an elevated security risk since the user running the container (or any process they start) now has access to any container running on the system, and potentially root access to the host operating system itself. This isn't intended for production use and is rather intended as temporary elevation on a single-user development system to allow for automating workflows involving docker containers. Other security controls such as docker socket proxies exist which allow for further restricting access on the docker socket but this does raise the complexity bar somewhat and also brings another layer of management into the fold. The impact of the technical cost and risk decisions need to be carefully considered.
 
 ## Usage
 Obviously, `docker` and it's related support software needs to be installed on the host system. Additionally, the `make` utility is used to assist in managing the build environment, but isn't necessary. You could enter the build commands manually of course.

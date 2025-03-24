@@ -120,6 +120,10 @@ RUN apt purge lsb-release -y && apt autoremove -y
 RUN cd /tmp && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
     ./aws/install
+
+# aws cli session manager plugin
+RUN curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "/tmp/session-manager-plugin.deb" && \
+    dpkg -i /tmp/session-manager-plugin.deb
  
 # Install GCP SDK
 RUN wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
