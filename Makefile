@@ -130,14 +130,14 @@ build_upgrade:
 run:
 	docker run -it --rm \
 	--hostname $(IMAGE_NAME) \
-	--user ${USER_UID}:${USER_GROUP_GID}  \
+	--user ${USER_UID}:${USER_GROUP_GID} \
 	--name $(CONTAINER_NAME) \
 	$(IMAGE_NAME):${IMAGE_VERSION}
 
 # Make target to run the Docker container with volume mounted app directory
 runm:
 	docker run -it --rm \
-	--hostname $(IMAGE_NAME) \		
+	--hostname $(IMAGE_NAME) \
 	--user ${USER_UID}:${USER_GROUP_GID} \
 	--name ${CONTAINER_NAME} \
 	--volume ${HOST_PATH}:${CONT_APP_MNT} \
