@@ -156,13 +156,13 @@ runmh:
 # Make target to run the Docker container with mounted app directory and user's home directory mounted read-only on /mnt/${USER_HOME}
 nodemh:
 	docker run -it --rm \
-    --hostname $(IMAGE_NAME) \
-    --user ${USER_UID}:${USER_GROUP_GID} \
-    --name ${CONTAINER_NAME} \
-    --volume ${HOST_PATH}:${CONT_APP_MNT} \
-    --volume ${USER_HOME}:/mnt/${USER_HOME}:ro \
+	--hostname $(IMAGE_NAME) \
+	--user ${USER_UID}:${USER_GROUP_GID} \
+	--name ${CONTAINER_NAME} \
+	--volume ${HOST_PATH}:${CONT_APP_MNT} \
+	--volume ${USER_HOME}:/mnt/${USER_HOME}:ro \
 	-p 3000:3000 \
-    ${IMAGE_NAME}:${IMAGE_VERSION}
+	${IMAGE_NAME}:${IMAGE_VERSION}
 
 # mount home directory with the docker daemon mounted in container for use with ECR/docker
 runmhdock:
