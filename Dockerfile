@@ -62,6 +62,7 @@ RUN apt-get install sudo \
     make \
     nano \
     procps \
+    python3-boto3 \
     tree \
     rsync \
     sqlite3 \
