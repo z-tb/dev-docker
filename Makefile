@@ -29,11 +29,21 @@ USER_GROUP_NAME := $(shell id -gn)
 USER_NAME       := $(shell id -un)
 USER_SHELL      := $(shell echo $$SHELL)
 USER_HOME       := $(shell echo $$HOME)
+# custom persistent home directory, not your $HOME
 PERSIST_HOME    := $(USER_HOME)/.devdocker-home
 
 # Container user defaults to host user unless explicitly overridden
 CON_USER    ?= $(USER_NAME)
-SUPP_GROUPS ?= $(USER_GROUP_GID)
+
+# ----------------------------------------------------------------------
+# supplemental groups for runtime user add to the container user groups
+# use current user groups, or define your own here
+# ----------------------------------------------------------------------
+SUPP_GROUPS := $(shell id -Gn | tr ' ' '\n' | while read g; do \
+    gid=$$(getent group "$$g" | cut -d: -f3); \
+    [ -n "$$gid" ] && printf "%s:%s," "$$g" "$$gid"; \
+done | sed 's/,$$//')
+
 
 DOCKER_SOCKET      := /var/run/docker.sock
 CONT_DOCKER_SOCKET := /var/run/docker.sock
@@ -124,7 +134,7 @@ build:
 
 # Make target to rebuild the Docker image with --no-cache option
 rebuild:
-	docker build --no-cache $(DEBUG_OPTS) \
+	docker build --pull --no-cache $(DEBUG_OPTS) \
 		$(BUILD_ARGS) \
 		--build-arg PIP_UPGRADE=$(PIP_UPGRADE) \
 		-t $(IMAGE_NAME):$(IMAGE_VERSION) -f ./Dockerfile .
@@ -136,32 +146,13 @@ build_upgrade:
 		--build-arg PIP_UPGRADE="true" \
 		-t $(IMAGE_NAME):$(IMAGE_VERSION) -f ./Dockerfile .
 
-# Make target to just run the Docker container with no mounts
-run:
-	docker run -it --rm \
-		--hostname $(IMAGE_NAME) \
-		--user $(USER_UID):$(USER_GROUP_GID) \
-		--name $(CONTAINER_NAME) \
-		$(IMAGE_NAME):$(IMAGE_VERSION)
-
-# Make target to run the Docker container with volume mounted app directory
-runm:
-	docker run -it --rm \
-		--hostname $(IMAGE_NAME) \
-		--user $(USER_UID):$(USER_GROUP_GID) \
-		--env USER_UID="$(USER_UID)" \
-		--env USER_GROUP_GID="$(USER_GROUP_GID)" \
-		--env USER_GROUP_NAME="$(USER_GROUP_NAME)" \
-		--env USER_NAME="$(CON_USER)" \
-		--env USER_SHELL="$(USER_SHELL)" \
-		--env USER_HOME="/home/$(CON_USER)" \
-		--env USER_GROUPS="$(SUPP_GROUPS)" \
-		--name $(CONTAINER_NAME) \
-		--volume $(HOST_PATH):$(CONT_APP_MNT) \
-		$(IMAGE_NAME):$(IMAGE_VERSION)
 
 # Make target to run the Docker container with mounted app directory and persistent home (~/.devdocker-home)
-runmh:
+run:
+	@# Detect SSH Agent on the host and construct flags natively in Make variables
+	$(eval SSH_FORWARD_FLAGS := $(if $(SSH_AUTH_SOCK),--env SSH_AUTH_SOCK=$(SSH_AUTH_SOCK) --volume $(SSH_AUTH_SOCK):$(SSH_AUTH_SOCK),))
+	$(if $(SSH_AUTH_SOCK),,@echo "⚠️ SSH_AUTH_SOCK not set on host; mount ~/.ssh manually or start an ssh-agent.")
+
 	docker run -it --rm \
 		--hostname $(IMAGE_NAME) \
 		--user $(USER_UID):$(USER_GROUP_GID) \
@@ -172,42 +163,36 @@ runmh:
 		--env USER_SHELL="$(USER_SHELL)" \
 		--env USER_HOME="/home/$(CON_USER)" \
 		--env USER_GROUPS="$(SUPP_GROUPS)" \
+		$(SSH_FORWARD_FLAGS) \
 		--name $(CONTAINER_NAME) \
 		--volume $(HOST_PATH):$(CONT_APP_MNT) \
 		--volume $(PERSIST_HOME):/home/$(CON_USER) \
 		$(IMAGE_NAME):$(IMAGE_VERSION)
 
-# Make target to run the Docker container with mounted app directory, persistent home (~/.devdocker-home), and port 3000 exposed
-nodemh:
-	docker run -it --rm \
-		--hostname $(IMAGE_NAME) \
-		--user $(USER_UID):$(USER_GROUP_GID) \
-		--env USER_GROUPS="$(SUPP_GROUPS)" \
-		--name $(CONTAINER_NAME) \
-		--volume $(HOST_PATH):$(CONT_APP_MNT) \
-		--volume $(PERSIST_HOME):/home/$(CON_USER) \
-		-p 3000:3000 \
-		$(IMAGE_NAME):$(IMAGE_VERSION)
 
 # Mount app directory and persistent home (~/.devdocker-home) with host docker socket inside container
-runmhdock:
+rundock:
+	$(eval SSH_FORWARD_FLAGS := $(if $(SSH_AUTH_SOCK),--env SSH_AUTH_SOCK=$(SSH_AUTH_SOCK) --volume $(SSH_AUTH_SOCK):$(SSH_AUTH_SOCK),))
+	$(if $(SSH_AUTH_SOCK),,@echo "⚠️ SSH_AUTH_SOCK not set on host; mount ~/.ssh manually or start an ssh-agent.")
+
 	docker run -it --rm \
 		--hostname $(IMAGE_NAME) \
 		--user $(USER_UID):$(USER_GROUP_GID) \
-		--env USER_GROUPS="$(SUPP_GROUPS)" \
 		--env USER_UID="$(USER_UID)" \
+		--env USER_GROUPS="$(SUPP_GROUPS)" \
 		--env USER_GROUP_GID="$(USER_GROUP_GID)" \
 		--env USER_GROUP_NAME="$(USER_GROUP_NAME)" \
 		--env USER_NAME="$(CON_USER)" \
 		--env USER_SHELL="$(USER_SHELL)" \
 		--env USER_HOME="/home/$(CON_USER)" \
-		--group-add docker \
-		--group-add $(DOCKER_GID) \
-		--name $(CONTAINER_NAME) \
+		--env USER_GROUPS="$(SUPP_GROUPS)" \
+		$(SSH_FORWARD_FLAGS) \
+		--name $(CONTAINER_NAME)-docksock \
+		--volume $(DOCKER_SOCKET):$(CONT_DOCKER_SOCKET) \
 		--volume $(HOST_PATH):$(CONT_APP_MNT) \
 		--volume $(PERSIST_HOME):/home/$(CON_USER) \
-		--volume $(DOCKER_SOCKET):$(CONT_DOCKER_SOCKET) \
 		$(IMAGE_NAME):$(IMAGE_VERSION)
+	
 
 # Make target to connect to the running container
 connect:
@@ -235,7 +220,7 @@ help:
 	@echo "  make stop          - Stop the Docker container"
 	@echo "  make clean         - Stop and remove the Docker container, and remove the Docker image"
 	@echo "  make help          - Display this help message"
-	@echo "  make rebuild       - Build the docker image with --no-cache option"
+	@echo "  make rebuild       - Build the docker image with --pull and --no-cache option"
 	@echo "  make build_upgrade - Build the docker image with OS and PIP upgrade for things in the requirements.txt file"
 	@echo "  make env           - Create a .env file for use with docker compose"
 

@@ -108,6 +108,24 @@ alias tf="tofu"
 alias asl="aws s3 ls"
 alias aan="acc=\$(aws sts get-caller-identity --query \"Account\" --output text) && echo Retrieved AWS account: \$acc || echo 'Error retrieving AWS account'"
 
+#------------------------------------------------------------------
+# if in a docker container, or DinD, return the whale icon, otherwise whatever was passed
+#------------------------------------------------------------------
+is_docker()
+{
+    sys_sep="$1"
+    if [ -f /.dockerenv ]; then
+      sys_sep='[🐳]'
+    fi  
+
+    # host docker socket mounted: overrides the plain whale
+    if [ -S /var/run/docker.sock ]; then
+        sys_sep='[🐳🔌]'
+    fi  
+
+    echo $sys_sep
+}
+
 
 #------------------------------------------------------------------
 # color prompt - run pcol from ~/.bashrc to activate
@@ -130,7 +148,7 @@ function pcol() {
              RESET='\[\e[0m\]'
 
     # Build prompt components
-    TIME_DATE="[${BOLD_BLUE}\$(date '+%I:%M')${RESET} ✖️ 🐳 ${BOLD_YELLOW}\$(date '+%D')${RESET}\$(display_git_branch)${BOLD_CYAN}]${RESET}"
+    TIME_DATE="[${BOLD_BLUE}\$(date '+%I:%M')${RESET} \$(is_docker) ${BOLD_YELLOW}\$(date '+%D')${RESET}\$(display_git_branch)${BOLD_CYAN}]${RESET}"
     USER_HOST="[${BOLD_CYAN}\u${WHITE}@${LIGHT_BLUE}\h ${BOLD_MAGENTA}\w${BOLD_CYAN}]${RESET}"
     PCHAR="${BOLD_CYAN}${PCHAR}${RESET}"
 
